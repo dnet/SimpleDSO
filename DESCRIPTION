@@ -1,0 +1,5 @@
+Some description of folders content
+
+UI - .ui files, build.sh to compile them to .py 
+ut2XXX - module which allow download of data from DSO to PC
+doc - some doc about DSO
