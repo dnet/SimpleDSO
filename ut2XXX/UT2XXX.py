@@ -542,9 +542,9 @@ if __name__ == '__main__':
 
 	dso = UNI_T_DSO()
 	if dso.is_present:
-		dso.get_info_from_device()
 		while raw_input("q = konec / quit") != "q":
-			dso.test_parameters()
+			#dso.test_parameters()
+			print "Info:",dso.get_info_from_device(), dso.status
 		
 		dso.leave_far_mode()
 		dso.ping()
