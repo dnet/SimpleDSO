@@ -80,23 +80,25 @@ class DSO_Scene(QGraphicsScene):
 			bw_lim = ""
 			if ch2_data["Bw_limit"]:
 				bw_lim = ", Bw"
-			self.ch2_range.setText("CH2: "+str(ch2_data["V_div"])+"V/div, "+ch1_data["couple"]+bw_lim)
+			self.ch2_range.setText("CH2: "+str(ch2_data["V_div"])+"V/div, "+ch2_data["couple"]+bw_lim)
 		else:
 			self.wave2.hide()
 			self.ch2_cursor.hide()
 			self.ch2_range.setText("CH2: OFF")
 		
-		#print "Debug:",ch2_data["x_offset"]
-		if ch2_data["x_offset"] in range(0,250):		
+		print "Debug:",ch1_data["x_offset"]
+		print "Debug:",ch2_data["x_offset"]
+		
+		if ch2_data["x_offset"] == ch1_data["x_offset"]:		
+			self.chX_cursor.setRotation(0)
 			self.chX_cursor.setP(2*(ch2_data["x_offset"])+14)
 			self.time_offset.setPos(2*(ch2_data["x_offset"]),-15)
 			self.time_offset.setText("Pos: "+utils.float2engstr((125-ch2_data["x_offset"])*ch1_data["s_div"]/25)+"s")
-#		elif ch2_data["x_offset"] in range(0,3):
-#			self.chX_cursor.setP(20)
-#			self.time_offset.setPos(0,-15)
-		elif ch2_data["x_offset"] > 250:
-			self.chX_cursor.setP(270)
-			self.time_offset.setPos(270,-15)
+		else:
+			self.chX_cursor.setP(20)
+			self.chX_cursor.setRotation(90)
+			self.time_offset.setPos(20,-15)
+			self.time_offset.setText("Pos: "+utils.float2engstr((125-ch1_data["x_offset"]+256-ch2_data["x_offset"])*ch1_data["s_div"]/25)+"s")
 			
 		self.time_range.setText("TIME: "+utils.float2engstr(ch1_data["s_div"])+"s/div")
 			
@@ -133,9 +135,9 @@ class DSO_wave(QGraphicsItemGroup):
 		
 		self.offset_x = 10
 		
-		for i in range(self.offset_x,250+self.offset_x):
+		for x in range(self.offset_x,500+self.offset_x):
 			line = QGraphicsLineItem(self)
-			line.setLine(i*2,20+200,(i*2)+2,20+200)
+			line.setLine(x,20+200,x+1,20+200)
 			line.setPen(self.pen)
 			self.lines.append(line)
 			
@@ -151,12 +153,15 @@ class DSO_wave(QGraphicsItemGroup):
 		y = 20
 		for sample in samples:
 			line = self.lines[index]
-			index += 1 
+			line2 = self.lines[index+1]
+			index += 2 
 			# first point
 			if x == 20:
 				line.setLine(x,(2*(255 - sample) - 34),x,(2*(255 - sample) - 34))
 			else:
-				line.setLine(x-2,y,x,(2*(255 - sample) - 34))
+				line.setLine(x-1,y,x,(2*(255 - sample) - 34))
+				line2.setLine(x,y,x+1,(2*(255 - sample) - 34))
+				
 				
 			x = x + 2
 			y = (2*(255 - sample) - 34)

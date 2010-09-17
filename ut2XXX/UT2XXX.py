@@ -3,6 +3,7 @@
 
 #########################################################
 #   Program pro ovladani osciloskopu UT2XXX             #
+#   Basic program for DSO controll			#
 #                                                       #
 #   Ing. Košan Tomáš, prosinec 2008                     #
 #                                                       #
@@ -15,11 +16,11 @@
 PID = [2098]
 VID = [22102] 
 
-
 from ut2XXX_definitions import *
 
 import usb, time, StringIO, sys, os
 
+# main class, encapsulates all USB communication
 class UNI_T_DSO:
 
 	# init
@@ -76,18 +77,22 @@ class UNI_T_DSO:
 		self.error_message = ""
 		
 		self.init()
-		
+	
+	# find DSO and initiate it
 	def init(self):	
-			
+		# load VID and PIDS from external file	
 		self.load_vid_pid()
 		self.device = None
 		self.interface_id = 0
 		self.config_id = 1
 		self.endpoints = []
+		# try to find device
 		self.find_device()
+		# device not found
 		if not self.device:
 			print "Err: Error finding device. Exiting."
 			self.is_present = False
+		# Yes, weve got a DSO connected 
 		else:
 			self.is_present = True
 			self.handle = self.device.open()
@@ -95,28 +100,32 @@ class UNI_T_DSO:
 			self.manufacturer = self.handle.getString(self.device.iManufacturer, 50)
 			self.handle.setConfiguration(self.config_id)
 			self.handle.claimInterface(self.interface_id)
-			
+			# init device
 			self.init_device()
 		
 		self.data = None
-
+	
+	# loads VIDs and PIDs from external file - vid_pid.txt
 	def load_vid_pid(self):
+		# file should be in our install dir
 		self.path = os.path.dirname(sys.argv[0])
 		try:
+			# load VID and PID
 			for line in open(os.path.join(self.path,"./vid_pid.txt")):
+				# ignore comment
 				if len(line.split('#')[0])>0:
 					line = line.replace('\r','').replace('\n','')
 					VID.append(int(line.split('#')[0].split(',')[0]))
 					PID.append(int(line.split('#')[0].split(',')[1]))
 		except Exception, (s):
 			print "Wrn: Exception in reading VID/PID ->",s
-		
+		# report
 		print "Inf: Loaded VID/PIDS are:"
 		print "Inf: VIDs -> ",VID
 		print "Inf: PIDs -> ",PID
 
 
-	# try to find proper USB device and get her config
+	# try to find proper USB device and get config
 	def find_device(self):
 	
 		busses = usb.busses()
@@ -124,7 +133,7 @@ class UNI_T_DSO:
 		for bus in busses:
 			devices = bus.devices
 			for dev in devices:
-				# is device in our PID and GID lists ?
+				# is device in our PID and VID lists ?
 				if dev.idProduct in PID and dev.idVendor in VID:
 					print "Inf: Found UNI-T DSO on USB:"
 					#print "  iManuf. :",dev.iManufacturer
@@ -175,6 +184,7 @@ class UNI_T_DSO:
 			self.status["far_mode"] = False			
 		return ans	
 	
+	# returns some values, but I don't know what they means ... 
 	def get_info_from_device(self):		
 		# asi nastaveni jednotlivych ovl. prvku
 		# maybe state of control
@@ -189,6 +199,7 @@ class UNI_T_DSO:
 			self.error_message = s	
 		return ans	
 	
+	# basic function for send some message to DSO
 	def send_message(self, message):
 		ans = False
 		try:	
@@ -198,7 +209,8 @@ class UNI_T_DSO:
 		except Exception, (s):
 			print "Err: Error in send_message:",s
 		return ans
-		
+	
+	# receive data from DSO, returns 1024 byte of data, some description in doc directory
 	def get_data(self):
 		for i in range(0,5):
 			self.handle.controlMsg(0x42,0xb1,None,index=0, value=0xe1)	
@@ -527,6 +539,7 @@ class UNI_T_DSO:
 			print "Inf: Unsuported color:", color
 			return (255,255,255)	
 
+	# test changes in data from DSO
 	def test_parameters(self):
 		data = dso.get_parameters()
 		if self.data == None:
@@ -537,14 +550,15 @@ class UNI_T_DSO:
 				
 		self.data = data
 
-
+# for testing functions
 if __name__ == '__main__':
 
 	dso = UNI_T_DSO()
 	if dso.is_present:
 		while raw_input("q = konec / quit") != "q":
-			#dso.test_parameters()
-			print "Info:",dso.get_info_from_device(), dso.status
+			dso.test_parameters()
+			#print "Info:",dso.get_info_from_device(), dso.status
+			#print "Param:", dso.get_parameters()
 		
 		dso.leave_far_mode()
 		dso.ping()
