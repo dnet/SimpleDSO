@@ -1,0 +1,14 @@
+If you get "Comunication error" under Linux:
+1/ find XX-permision.rules file - where XX is some number, usually file can be found in /lib/udev/rules.d
+2/ find lines: 
+# usbfs-like devices
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", \
+			MODE="0664"
+
+and change them to
+
+# usbfs-like devices
+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", \
+			MODE="0666"
+
+

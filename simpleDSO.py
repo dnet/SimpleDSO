@@ -58,6 +58,7 @@ def DSO_thread():
 			except:
 				pass
 			else:
+				print "Dbg:Processing",msg
 				# parse commands
 				if msg == "END_NOW":
 					want_run = False
@@ -69,7 +70,7 @@ def DSO_thread():
 					dso.leave_far_mode()
 						
 				elif msg == "GET_WAVE" and not offline:
-					#print "Msg form main: get wave"
+					#print "Msg from main: get wave"
 					dso.get_waveform()
 					Que_thread2main.put("DATA")
 					Que_thread2main.put(dso.ch1_data)	

@@ -94,12 +94,18 @@ class UNI_T_DSO:
 			self.is_present = False
 		# Yes, weve got a DSO connected 
 		else:
+			print "Dbg: Device is presented"
 			self.is_present = True
 			self.handle = self.device.open()
-			self.product = self.handle.getString(self.device.iProduct, 50),
+			print "Dbg: device opened"
+			self.product = self.handle.getString(self.device.iProduct, 50)
+			print "Dbg: getting product ID"
 			self.manufacturer = self.handle.getString(self.device.iManufacturer, 50)
+			print "Dbg: getting manufacturer"
 			self.handle.setConfiguration(self.config_id)
+			print "Dbg: device configured"
 			self.handle.claimInterface(self.interface_id)
+			print "Dbg: interface claimed"
 			# init device
 			self.init_device()
 		
@@ -146,17 +152,17 @@ class UNI_T_DSO:
 						for intf in config.interfaces:
 							#print "    Interface:",intf[0].interfaceNumber
 							for alt in intf:
-							#	print "    Alternate Setting:",alt.alternateSetting
-							#	print "      Interface class:",alt.interfaceClass
-							#	print "      Interface sub class:",alt.interfaceSubClass
-							#	print "      Interface protocol:",alt.interfaceProtocol
+								print "    Alternate Setting:",alt.alternateSetting
+								print "      Interface class:",alt.interfaceClass
+								print "      Interface sub class:",alt.interfaceSubClass
+								print "      Interface protocol:",alt.interfaceProtocol
 								# find all endpoints
 								for ep in alt.endpoints:
 									self.endpoints.append(ep.address)
-							#		print "      Endpoint:",hex(ep.address)
-							#		print "        Type:",ep.type
-							#		print "        Max packet size:",ep.maxPacketSize
-							#		print "        Interval:",ep.interval
+									print "      Endpoint:",hex(ep.address)
+									print "        Type:",ep.type
+									print "        Max packet size:",ep.maxPacketSize
+									print "        Interval:",ep.interval
 					
   	# enters far mode - it means all control on osciloscope is blocked
 	def enter_far_mode(self):
